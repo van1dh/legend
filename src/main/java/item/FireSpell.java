@@ -1,0 +1,33 @@
+package item;
+
+import character.Monster;
+
+/**
+ * FireSpell is a type of Spell that reduces the target monster's defense when cast.
+ */
+public class FireSpell extends Spell {
+
+    /**
+     * Constructs a FireSpell.
+     *
+     * @param name          the name of the spell
+     * @param cost          the cost to buy the spell
+     * @param requiredLevel the minimum level required to use the spell
+     * @param baseDamage    the base damage the spell deals
+     * @param manaCost      the mana required to cast the spell
+     */
+    public FireSpell(String name, int cost, int requiredLevel, int baseDamage, int manaCost) {
+        super(name, cost, requiredLevel, baseDamage, manaCost);
+    }
+
+    /**
+     * Applies the FireSpell effect: reduces the monster's defense stat.
+     *
+     * @param monster the monster being attacked
+     */
+    @Override
+    public void applySpellEffect(Monster monster) {
+        int oldDefense = monster.getDefense();
+        monster.setDefense((int) (oldDefense * 0.9)); // Reduce defense by 10%
+    }
+}
