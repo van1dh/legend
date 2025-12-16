@@ -1,6 +1,10 @@
-# Legends of Valor - Complete Game Implementation
+# Legends - Complete Game Implementation
 
 ## Project Overview
+
+Legends consists of two games: **Legends: Monsters & Heroes** and **Legends of Valor**.
+
+**Legends: Monsters & Heroes** is a traditional turn-based RPG where heroes explore a randomly generated world, engage in tactical battles, visit markets to buy equipment, and grow stronger through experience. Unlike the objective-based Valor mode, this classic mode focuses on character progression, resource management, and tactical combat mastery.
 
 **Legends of Valor** is a MOBA (Multiplayer Online Battle Arena)-style game implemented in Java. Players control a team of 3 heroes battling through 3 lanes to reach the enemy's Nexus while defending their own fortress from waves of monsters.
 
@@ -124,6 +128,626 @@ java -cp out Main
 1) Legends: Monsters & Heroes (Classic RPG)
 2) Legends of Valor (MOBA-style)
 Q) Quit
+```
+
+---
+
+## Legends: Monsters & Heroes - Complete Features
+
+### Map Layout
+
+- **Size:** 8×8 grid (configurable)
+- **Generation:** Randomized each game
+- **Cell Types:**
+  - **Common (C):** Walkable terrain with 30% battle chance
+  - **Market (M):** Safe zones for shopping
+  - **Inaccessible (X):** Blocked terrain (mountains, walls, water)
+
+### Cell Distribution
+```
+20% Inaccessible (X)
+30% Market (M)
+50% Common (C)
+```
+
+### Hero Display
+- **H1:** First hero in party
+- **H2:** Second hero in party
+- **H3:** Third hero in party
+
+### Example Map
+```
+H1 C  M  X  C  M  C  C
+C  M  C  C  X  C  M  C
+M  C  C  M  C  X  C  C
+C  X  M  C  C  C  M  X
+C  C  C  C  M  C  C  C
+M  C  X  C  C  M  X  C
+C  C  C  M  C  C  C  M
+C  M  C  C  X  C  M  C
+```
+
+---
+
+### Controls & Movement
+
+#### Exploration Controls
+```
+W/w - Move Up (North)
+A/a - Move Left (West)
+S/s - Move Down (South)
+D/d - Move Right (East)
+I/i - View Hero Stats
+P/p - View Map
+V/v - View Inventory
+M/m - Enter Market (when on market cell)
+Q/q - Quit Game
+```
+
+#### Movement Rules
+- Can move to Common cells (may trigger battle)
+- Can move to Market cells (safe, no battles)
+- Cannot move to Inaccessible cells
+- Cannot move outside map boundaries
+- Each hero moves individually per turn
+
+---
+
+### Battle System
+
+#### Battle Trigger
+- **Location:** Common cells (marked 'C')
+- **Chance:** 30% when entering a common cell
+- **Monsters:** Equal to number of heroes in party
+- **Level:** Near highest hero level
+
+#### Turn Structure
+
+```
+┌─────────────────────────┐
+│ ROUND N                 │
+├─────────────────────────┤
+│ 1. Heroes' Turn         │
+│    - Hero 1 acts        │
+│    - Hero 2 acts        │
+│    - Hero 3 acts        │
+│                         │
+│ 2. Monsters' Turn       │
+│    - Monster 1 attacks  │
+│    - Monster 2 attacks  │
+│    - Monster 3 attacks  │
+│                         │
+│ 3. End of Round         │
+│    - Regen 10% HP       │
+│    - Regen 10% Mana     │
+│                         │
+│ Repeat until victory    │
+│ or defeat               │
+└─────────────────────────┘
+```
+
+#### Hero Actions in Battle
+
+**1. Attack with Weapon (Action 1)**
+- Uses equipped weapon
+- Costs: 0 mana
+- Formula: `(Strength + Weapon Damage) × 0.05`
+- Modified by: Monster defense, dodge chance
+
+**2. Cast Spell (Action 2)**
+- Uses mana from pool
+- Costs: Varies by spell (70-600 mana)
+- Formula: `Base Damage + (Dexterity / 10000) × Base Damage`
+- Effects:
+  - **Fire:** Damage + reduce defense 10%
+  - **Ice:** Damage + reduce attack 10%
+  - **Lightning:** Damage + reduce dodge 10%
+-  **Single Use:** Spells consumed after casting!
+
+**3. Use Potion (Action 3)**
+- Instant effect
+- Consumes potion from inventory
+- Types:
+  - Health: Restore HP
+  - Mana: Restore mana
+  - Strength: Permanently increase strength
+  - Agility: Permanently increase agility
+
+**4. View Stats (Action 4)**
+- **FREE ACTION** - Doesn't use turn
+- Shows all heroes and monsters
+- Displays HP/Mana bars
+- Shows damage and defense stats
+
+**Q. Quit Battle**
+- Forfeit battle with confirmation
+- Returns to previous state
+- Can quit anytime
+
+#### Combat Formulas
+
+```java
+// Physical Attack Damage
+Attack = (Hero Strength + Weapon Damage) × 0.05
+Actual Damage = max(0, Attack - Monster Defense)
+
+// Spell Damage
+Spell Damage = Base + (Hero Dexterity / 10000) × Base
+
+// Hero Dodge Chance
+Dodge % = Hero Agility × 0.002  // 0.2% per point
+
+// Monster Dodge Chance
+Dodge % = From data file (10-90%)
+
+// Regeneration (End of Round)
+HP Regen = Current HP × 1.1 (capped at Max HP)
+Mana Regen = Current Mana × 1.1 (capped at Max Mana)
+```
+
+#### Battle Outcomes
+
+##### Victory (All Monsters Defeated)
+**Rewards (to ALL heroes):**
+- Gold: `100 × monster_level` per monster
+- Experience: `2 points` per monster
+
+**Example:**
+```
+3 Monsters defeated:
+- Level 3 Dragon: 300 gold, 2 exp
+- Level 3 Spirit: 300 gold, 2 exp
+- Level 2 Exo: 200 gold, 2 exp
+Total: 800 gold, 6 exp (to each hero)
+```
+
+**Fallen Heroes:**
+- Revive at 50% HP
+- Revive at 50% Mana
+
+##### Defeat (All Heroes at 0 HP)
+- **Game Over**
+- Display final statistics
+- Return to main menu
+
+---
+
+### Market System
+
+#### Accessing Markets
+
+**Location:** Any cell marked 'M' on the map
+
+**Entry:**
+1. Move hero to market cell
+2. Press 'M' to enter
+
+**Features:**
+- Safe zone (no random battles)
+- Unlimited shopping time
+- Actions don't consume hero turns
+- All transactions instant
+
+#### Market Menu
+
+```
+╔════════════════════════════════╗
+║   WELCOME TO THE MARKET        ║
+╚════════════════════════════════╝
+Hero: [Name]
+Gold: [Amount]
+
+--- MARKET MENU ---
+1) Buy items
+2) Sell items
+3) Equip weapon
+4) Equip armor
+5) View inventory
+6) Exit market
+Q) Quit game
+
+Choice:
+```
+
+#### 1. Buy Items
+
+**Categories Available:**
+- Weapons
+- Armor
+- Potions
+- Spells (Fire, Ice, Lightning)
+
+**Requirements:**
+- Sufficient gold
+- Required level met
+
+**Display Format:**
+```
+[OK] Item Name (Cost: X, Level: Y, Stats...)
+[X]  Item Name (Cost: X, Level: Y, Stats...)
+     ↑ Cannot afford or level too low
+```
+
+#### 2. Sell Items
+
+**Sell Price:** 50% of purchase cost
+
+**Example:**
+```
+Purchase: Sword for 500 gold
+Sell: Sword for 250 gold
+```
+
+**All Item Types Can Be Sold:**
+- Weapons
+- Armor
+- Potions (even if partially consumed)
+- Spells (even if learned)
+
+#### 3. Equip Weapon
+
+- View owned weapons
+- Select to equip
+- Changes attack damage immediately
+- Shows currently equipped with [EQUIPPED] tag
+
+#### 4. Equip Armor
+
+- View owned armor pieces
+- Select to equip
+- Changes damage reduction immediately
+- Shows currently equipped with [EQUIPPED] tag
+
+#### 5. View Inventory
+
+Complete organized listing:
+```
+Weapons: [count]
+- Weapon 1 (Damage: X, Hands: Y)
+- Weapon 2 (Damage: X, Hands: Y)
+
+Armors: [count]
+- Armor 1 (Defense: X)
+- Armor 2 (Defense: X)
+
+Potions: [count]
+- Potion 1 (Effect: +X to Attribute)
+- Potion 2 (Effect: +X to Attribute)
+
+Spells: [count]
+- Spell 1 (Damage: X, Mana: Y)
+- Spell 2 (Damage: X, Mana: Y)
+```
+
+#### Available Items
+
+##### Weapons (Weaponry.txt)
+| Name | Cost | Level | Damage | Hands |
+|------|------|-------|--------|-------|
+| Dagger | 200 | 1 | 250 | 1 |
+| Sword | 500 | 1 | 800 | 1 |
+| Bow | 300 | 2 | 500 | 2 |
+| Axe | 550 | 5 | 850 | 1 |
+| Scythe | 1000 | 6 | 1100 | 2 |
+| TSwords | 1400 | 8 | 1600 | 2 |
+
+##### Armor (Armory.txt)
+| Name | Cost | Level | Defense |
+|------|------|-------|---------|
+| Platinum_Shield | 150 | 1 | 200 |
+| Breastplate | 350 | 3 | 600 |
+| Full_Body_Armor | 1000 | 8 | 1100 |
+| Wizard_Shield | 1200 | 10 | 1500 |
+| Guardian_Angel | 1000 | 10 | 1000 |
+
+##### Potions (Potions.txt)
+| Name | Cost | Level | Effect | Attribute |
+|------|------|-------|--------|-----------|
+| Healing_Potion | 250 | 1 | +100 | Health |
+| Strength_Potion | 200 | 1 | +75 | Strength |
+| Magic_Potion | 350 | 2 | +100 | Mana |
+| Luck_Elixir | 500 | 4 | +65 | Agility |
+| Mermaid_Tears | 850 | 5 | +100 | Health/Mana/Str/Agi |
+| Ambrosia | 1000 | 8 | +150 | All Stats |
+
+##### Fire Spells (FireSpells.txt)
+| Name | Cost | Level | Damage | Mana | Effect |
+|------|------|-------|--------|------|--------|
+| Breath_of_Fire | 350 | 1 | 450 | 100 | -10% DEF |
+| Heat_Wave | 450 | 2 | 600 | 150 | -10% DEF |
+| Hell_Storm | 600 | 3 | 950 | 600 | -10% DEF |
+| Flame_Tornado | 700 | 4 | 850 | 300 | -10% DEF |
+| Lava_Comet | 800 | 7 | 1000 | 550 | -10% DEF |
+
+##### Ice Spells (IceSpells.txt)
+| Name | Cost | Level | Damage | Mana | Effect |
+|------|------|-------|--------|------|--------|
+| Ice_Blade | 250 | 1 | 450 | 100 | -10% DMG |
+| Snow_Cannon | 500 | 2 | 650 | 250 | -10% DMG |
+| Frost_Blizzard | 750 | 5 | 850 | 350 | -10% DMG |
+| Arctic_Storm | 700 | 6 | 800 | 300 | -10% DMG |
+
+##### Lightning Spells (LightningSpells.txt)
+| Name | Cost | Level | Damage | Mana | Effect |
+|------|------|-------|--------|------|--------|
+| Lightning_Dagger | 400 | 1 | 500 | 150 | -10% Dodge |
+| Spark_Needles | 500 | 2 | 600 | 200 | -10% Dodge |
+| Thunder_Blast | 750 | 4 | 950 | 400 | -10% Dodge |
+| Electric_Arrows | 550 | 5 | 650 | 200 | -10% Dodge |
+
+---
+
+### Hero Classes
+
+#### Warrior
+**From:** Warriors.txt
+
+**Base Statistics:**
+- Mana: 100-600 (Lower range)
+- Strength: 700-900 (Highest)
+- Agility: 400-800 (High)
+- Dexterity: 500-750 (Moderate)
+- Money: 1354-2546 gold
+- Experience: 6-8
+
+**Level Up Bonuses:**
+- Base: +5% all stats
+- Favored: +10% Strength
+- Favored: +10% Agility
+
+**Playstyle:**
+- Front-line fighter
+- High physical damage
+- Tank role
+- Best for melee combat
+
+**Available Heroes:**
+- Gaerdal_Ironhand
+- Sehanine_Monnbow
+- Muamman_Duathall
+- Flandal_Steelskin
+- Undefeated_Yoj
+- Eunoia_Cyn
+
+**Starter Equipment:**
+- Weapon: Legendary Greatsword (2500 DMG, 2-handed)
+- Armor: Titanium Heavy Armor (800 DEF)
+
+#### Paladin
+**From:** Paladins.txt
+
+**Base Statistics:**
+- Mana: 100-500 (Moderate)
+- Strength: 500-750 (Good)
+- Agility: 500-700 (Good)
+- Dexterity: 350-700 (Varied)
+- Money: 2500 gold
+- Experience: 4-8
+
+**Level Up Bonuses:**
+- Base: +5% all stats
+- Favored: +10% Strength
+- Favored: +10% Dexterity
+
+**Playstyle:**
+- Balanced fighter
+- Good spell caster
+- Versatile
+- Best for mixed strategy
+
+**Available Heroes:**
+- Parzival
+- Sehanine_Moonbow
+- Skoraeus_Stonebones
+- Garl_Glittergold
+- Amaryllis_Astra
+- Caliber_Heist
+
+**Starter Equipment:**
+- Weapon: Holy Longsword (2200 DMG, 1-handed)
+- Armor: Divine Plate Armor (700 DEF)
+
+#### Sorcerer
+**From:** Sorcerers.txt
+
+**Base Statistics:**
+- Mana: 800-1300 (Highest)
+- Strength: 700-850 (Moderate)
+- Agility: 400-800 (High)
+- Dexterity: 400-800 (High)
+- Money: 2500 gold
+- Experience: 5-9
+
+**Level Up Bonuses:**
+- Base: +5% all stats
+- Favored: +10% Dexterity
+- Favored: +10% Agility
+
+**Playstyle:**
+- Spell damage focus
+- High mana pool
+- Glass cannon
+- Best for magical combat
+
+**Available Heroes:**
+- Rillifane_Rallathil
+- Segojan_Earthcaller
+- Reign_Havoc
+- Reverie_Ashels
+- Kalabar
+- Skye_Soar
+
+**Starter Equipment:**
+- Weapon: Arcane Staff (2000 DMG, 1-handed)
+- Armor: Enchanted Mage Robe (600 DEF)
+
+#### Enhanced Starter Inventory
+
+**All Heroes Start With:**
+
+**Consumables:**
+- 10× Super Healing Potions (+300 HP each)
+- 10× Super Mana Potions (+300 Mana each)
+- 5× Greater Strength Potions (+200 STR each)
+- 5× Greater Agility Potions (+200 AGI each)
+
+**Spells:**
+- Warriors/Paladins: 7× each spell type
+- Sorcerers: 10× each spell type
+
+Spells included:
+- Mega Fireballs (1200 DMG, 80 mana)
+- Frozen Nova (1100 DMG, 75 mana)
+- Chain Lightning (1150 DMG, 70 mana)
+
+---
+
+### Monster Types
+
+#### Dragon
+**From:** Dragons.txt
+
+**Special Trait:** +10% Base Damage (favored stat)
+
+**Characteristics:**
+- High offensive capability
+- Moderate defense
+- Lower dodge chance
+
+#### Exoskeleton
+**From:** Exoskeletons.txt
+
+**Special Trait:** +10% Defense (favored stat)
+
+**Characteristics:**
+- Very high defense
+- Moderate damage
+- Battles take longer
+
+#### Spirit
+**From:** Spirits.txt
+
+**Special Trait:** +10% Dodge Chance (favored stat)
+
+**Characteristics:**
+- Very evasive
+- Moderate damage
+- Frustrating to hit
+
+---
+
+### Progression System
+
+#### Experience & Leveling
+
+**XP Formula:**
+```
+Level 1 → 2: 10 XP needed
+Level 2 → 3: 20 XP needed (30 total)
+Level 3 → 4: 30 XP needed (60 total)
+Level N → N+1: N × 10 XP needed
+```
+
+**Sources of Experience:**
+- Monster defeats: 2 XP per monster
+- Given to ALL heroes in party
+- Level up when threshold reached
+
+**Example Progression:**
+```
+Start: Level 1 (0/10 XP)
+Kill 5 monsters: Level 1 (10/10 XP) → Level Up!
+Now: Level 2 (0/20 XP)
+Kill 10 monsters: Level 2 (20/20 XP) → Level Up!
+Now: Level 3 (0/30 XP)
+```
+
+#### Level Up Benefits
+
+**All Heroes:**
+- HP: Recalculated as `Level × 300`, fully healed
+- Mana: Increases by 10%, fully restored
+- All Stats: Increase by 5%
+
+**Class-Specific Bonuses:**
+- Warriors: +10% Strength, +10% Agility
+- Paladins: +10% Strength, +10% Dexterity
+- Sorcerers: +10% Dexterity, +10% Agility
+
+**Example:**
+```
+Warrior Level 5:
+- Base Strength: 1000
+- Level up to 6:
+  - All stats +5%: 1000 → 1050
+  - Warrior bonus +10%: 1050 → 1155
+  - New Strength: 1155
+```
+
+#### Gold Economy
+
+**Earning:**
+- Monster kills: `100 × monster_level` per monster
+- Selling items: 50% of purchase price
+- Rewards given to ALL heroes
+
+**Early Game Budget (Level 1-3):**
+```
+Starting Gold: ~2500-7500 (starter equipment)
+First Upgrade: 500-800 (better weapon)
+Essential Items: 1000-1500 (potions, basic spells)
+Reserve: 1000+ (for emergencies)
+```
+
+**Mid Game Budget (Level 4-6):**
+```
+Target Gold: 5000+
+Upgrades: 1500-2000 (level 5-6 equipment)
+Supplies: 2000-3000 (potions, spells stock)
+Reserve: 1500+
+```
+
+**Late Game Budget (Level 7-10):**
+```
+Target Gold: 10000+
+Best Equipment: 1000-1400 per piece
+Full Supply: 3000-5000 (all consumables)
+Comfortable Reserve: 2000+
+```
+
+---
+
+### Quick Reference
+
+#### Damage Formulas
+```
+Physical: (STR + Weapon) × 0.05 - Monster DEF
+Magical: Base + (DEX / 10000) × Base
+Dodge: AGI × 0.002 (heroes), Data% (monsters)
+```
+
+#### Regen Formula
+```
+HP: Current × 1.1 (max at Max HP)
+Mana: Current × 1.1 (max at Max Mana)
+```
+
+#### Rewards
+```
+Gold: 100 × monster_level (per monster, all heroes)
+EXP: 2 (per monster, all heroes)
+```
+
+#### Level Requirements
+```
+Level N→N+1: N × 10 XP
+Example: Level 5→6 requires 50 XP
+```
+
+#### Sell Prices
+```
+All Items: 50% of purchase cost
+Example: Sword (500g) sells for 250g
 ```
 
 ---
@@ -290,7 +914,7 @@ Hero Dodge Chance = Hero Agility × 0.002 (0.2% per agility point)
 
 ---
 
-## Map Display Format
+### Map Display Format
 
 The game displays a detailed 8×8 grid matching the PDF specification:
 
@@ -312,9 +936,9 @@ P - P - P  P - P - P  I - I - I  C - C - C  P - P - P  I - I - I  B - B - B  B -
 
 ---
 
-## Hero Classes
+### Hero Classes
 
-### Warrior
+#### Warrior
 - **Strengths:** High Strength & Agility
 - **Favored Stats:** +10% Strength, +10% Agility per level
 - **Best For:** Front-line combat, high physical damage
@@ -322,7 +946,7 @@ P - P - P  P - P - P  I - I - I  C - C - C  P - P - P  I - I - I  B - B - B  B -
   - Legendary Greatsword (2500 DMG)
   - Titanium Heavy Armor (800 DEF)
 
-### Paladin
+#### Paladin
 - **Strengths:** Balanced Fighter
 - **Favored Stats:** +10% Strength, +10% Dexterity per level
 - **Best For:** Versatile combat, spell casting
@@ -330,7 +954,7 @@ P - P - P  P - P - P  I - I - I  C - C - C  P - P - P  I - I - I  B - B - B  B -
   - Holy Longsword (2200 DMG)
   - Divine Plate Armor (700 DEF)
 
-### Sorcerer
+#### Sorcerer
 - **Strengths:** Powerful Magic User
 - **Favored Stats:** +10% Dexterity, +10% Agility per level
 - **Best For:** Spell damage, hit-and-run tactics
@@ -338,7 +962,7 @@ P - P - P  P - P - P  I - I - I  C - C - C  P - P - P  I - I - I  B - B - B  B -
   - Arcane Staff (2000 DMG)
   - Enchanted Mage Robe (600 DEF)
 
-### Starter Equipment (All Heroes)
+#### Starter Equipment (All Heroes)
 - **Weapons:** Class-appropriate legendary weapon
 - **Armor:** Class-appropriate heavy armor
 - **Potions:**
@@ -353,31 +977,31 @@ P - P - P  P - P - P  I - I - I  C - C - C  P - P - P  I - I - I  B - B - B  B -
 
 ---
 
-## Monster Types
+### Monster Types
 
-### Dragon
+#### Dragon
 - **Special:** +10% Base Damage
 - **Characteristics:** High damage output, fierce attackers
 
-### Exoskeleton
+#### Exoskeleton
 - **Special:** +10% Defense
 - **Characteristics:** Tough armor, damage resistant
 
-### Spirit
+#### Spirit
 - **Special:** +10% Dodge Chance
 - **Characteristics:** Elusive, hard to hit
 
 ---
 
-## Controls & Commands
+### Controls & Commands
 
-### Movement
+#### Movement
 - **W:** Move North (towards Monster Nexus)
 - **A:** Move West
 - **S:** Move South (towards Hero Nexus)
 - **D:** Move East
 
-### Actions
+#### Actions
 - **1:** Move
 - **2:** Attack
 - **3:** Cast Spell
@@ -388,7 +1012,7 @@ P - P - P  P - P - P  I - I - I  C - C - C  P - P - P  I - I - I  B - B - B  B -
 - **8:** Recall
 - **9:** Pass Turn
 
-### Information
+#### Information
 - **I:** View Hero Info
 - **M:** View Map
 - **S:** Enter Market (if at Nexus)
@@ -426,70 +1050,6 @@ for each monster:
         attack(hero)
     else:
         move_south_one_cell()
-```
-
----
-
-## Known Issues & Fixes
-
-### Fixed: Teleport Identity Bug
-**Problem:** Heroes changed identity (H1→H2) after teleporting
-
-**Solution:**
-- `laneIndex` now represents permanent hero identity
-- Teleport only changes position, not identity
-- Heroes always display as their original lane number (H1/H2/H3)
-
-**Details:** See `BUG_FIX_TELEPORT.md` for complete analysis
-
----
-
-## Testing Guide
-
-### Test Case 1: Basic Movement
-```
-1. Start game, select 3 heroes
-2. Move H1 north (W) - should succeed
-3. Try to move H1 through wall (column 2/5) - should fail
-4. Try to move H1 to cell with H2 - should fail
-Pass if all restrictions work correctly
-```
-
-### Test Case 2: Combat System
-```
-1. Move hero adjacent to monster
-2. Attack monster - should deal damage
-3. Cast spell - should apply effect
-4. Verify monster stats changed
-Pass if damage and effects apply correctly
-```
-
-### Test Case 3: Teleport & Recall
-```
-1. H1 starts in Top Lane (row 7, col 0)
-2. Teleport H1 to Mid Lane
-3. Verify H1 still displays as "H1" (not H2)
-4. Recall H1
-5. Verify H1 returns to (7, 0) not Mid Lane
-Pass if identity preserved and recall correct
-```
-
-### Test Case 4: Win Conditions
-```
-1. Move any hero to row 0 (Monster Nexus)
-2. Game should end with "HEROES WIN"
-3. Let monster reach row 7 (Hero Nexus)
-4. Game should end with "MONSTERS WIN"
-Pass if both conditions trigger correctly
-```
-
-### Test Case 5: Terrain Effects
-```
-1. Move hero to Bush cell (B)
-2. Check dexterity increased by 10%
-3. Move hero away from Bush
-4. Check dexterity returned to normal
-Pass if buffs apply and remove correctly
 ```
 
 ---
