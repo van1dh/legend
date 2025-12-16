@@ -1,7 +1,7 @@
 package valor.cells;
 
 import valor.ValorCell;
-import core.hero.Hero;
+import core.character.hero.Hero;
 
 /**
  * Cave cell: increases hero's agility while standing in this cell.

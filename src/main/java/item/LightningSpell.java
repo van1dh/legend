@@ -1,6 +1,6 @@
 package item;
 
-import character.Monster;
+import core.character.Monster;
 
 /**
  * LightningSpell is a type of Spell that reduces the target monster's dodge chance.

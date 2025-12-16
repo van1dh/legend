@@ -2,8 +2,8 @@ package valor;
 
 import java.util.List;
 
-import core.hero.Hero;
-import core.monster.Monster;
+import core.character.hero.Hero;
+import core.character.monster.Monster;
 
 /**
  * Very simple monster AI for Valor:

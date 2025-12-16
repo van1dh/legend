@@ -1,10 +1,10 @@
 package game;
 
 import map.GameMap;
-import map.Position;
-import character.hero.Hero;
-import character.monster.Monster;
-import character.monster.MonsterFactory;
+import util.Position;
+import core.character.hero.Hero;
+import core.character.monster.Monster;
+import core.character.monster.MonsterFactory;
 
 import java.util.List;
 import java.util.Scanner;

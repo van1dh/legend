@@ -1,6 +1,6 @@
 package item;
 
-import core.FileLoader;
+import util.FileLoader;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,6 @@
 package map;
 
-import character.Hero;
-import utils.Colors;
-
+import core.character.Hero;
 import java.util.Random;
 
 /**

@@ -1,7 +1,7 @@
 package factory;
 
 import character.monster.*;
-import utils.FileLoader;
+import util.FileLoader;
 
 import java.util.ArrayList;
 import java.util.List;

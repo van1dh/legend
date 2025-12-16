@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import core.hero.Hero;
-import core.hero.HeroFactory;
-import core.monster.Monster;
-import core.monster.MonsterFactory;
+import core.character.hero.Hero;
+import core.character.hero.HeroFactory;
+import core.character.monster.Monster;
+import core.character.monster.MonsterFactory;
 
 /**
  * Main controller for Legends of Valor.

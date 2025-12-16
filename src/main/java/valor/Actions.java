@@ -3,11 +3,11 @@ package valor;
 import java.util.List;
 import java.util.Scanner;
 
-import core.hero.Hero;
-import core.item.Potion;
-import core.item.Spell;
-import core.item.Weapon;
-import core.monster.Monster;
+import core.character.hero.Hero;
+import item.Potion;
+import item.Spell;
+import item.Weapon;
+import core.character.monster.Monster;
 
 /**
  * Helper methods that implement hero actions in Valor.

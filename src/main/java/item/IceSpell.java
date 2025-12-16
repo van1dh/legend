@@ -1,6 +1,6 @@
 package item;
 
-import character.Monster;
+import core.character.Monster;
 
 /**
  * IceSpell is a type of Spell that reduces the target monster's damage when cast.

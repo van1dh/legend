@@ -27,14 +27,14 @@ public abstract class ValorCell {
     /**
      * Called when hero enters this cell (for buffs etc.).
      */
-    public void onHeroEnter(core.hero.Hero hero) {
+    public void onHeroEnter(core.character.hero.Hero hero) {
         // default no-op
     }
 
     /**
      * Called when hero leaves this cell (remove buffs).
      */
-    public void onHeroLeave(core.hero.Hero hero) {
+    public void onHeroLeave(core.character.hero.Hero hero) {
         // default no-op
     }
 }

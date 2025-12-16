@@ -1,7 +1,7 @@
 package valor.cells;
 
 import valor.ValorCell;
-import core.hero.Hero;
+import core.character.hero.Hero;
 
 /**
  * Bush cell: increases hero's dexterity while standing in this cell.
