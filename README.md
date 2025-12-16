@@ -118,9 +118,14 @@ src/
 First, make sure you are under legend/ folder, then run following commands:
 
 ```bash
-mkdir out
 find src/main/java -name '*.java' -print0 | xargs -0 javac -encoding UTF-8 -d out
 java -cp out Main
+```
+
+ If needed clear the out first:
+```bash
+rm -rf out
+mkdir out
 ```
 
 ### Game Selection
@@ -1103,3 +1108,4 @@ Potential achievements:
 - Hero progression
 
 ---
+
