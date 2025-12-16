@@ -102,21 +102,21 @@ src/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Java 17 or higher
 - Terminal/Command Prompt
 
-### Compilation
-```bash
-cd src/main/java
-javac Main.java
-```
 
 ### Running the Game
+
+First, make sure you are under legend/ folder, then run following commands:
+
 ```bash
-java Main
+mkdir out
+find src/main/java -name '*.java' -print0 | xargs -0 javac -encoding UTF-8 -d out
+java -cp out Main
 ```
 
 ### Game Selection
