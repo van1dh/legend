@@ -1,7 +1,7 @@
 package valor.cells;
 
 import valor.ValorCell;
-import core.character.hero.Hero;
+import character.hero.Hero;
 
 /**
  * Koulou cell: increases hero's strength while standing in this cell.

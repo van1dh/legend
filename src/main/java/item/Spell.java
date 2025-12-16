@@ -1,5 +1,7 @@
 package item;
 
+import character.monster.Monster;
+
 /**
  * Abstract base class for all types of spells in the game.
  * Spells have attributes like damage, mana cost, and may reduce enemy attributes upon casting.
@@ -43,7 +45,7 @@ public abstract class Spell extends Item {
      *
      * @param monster the monster being targeted by the spell
      */
-    public abstract void applySpellEffect(character.Monster monster);
+    public abstract void applySpellEffect(Monster monster);
 
     @Override
     public String toString() {

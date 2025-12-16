@@ -1,6 +1,6 @@
 package item;
 
-import core.character.Monster;
+import character.monster.Monster;
 
 /**
  * IceSpell is a type of Spell that reduces the target monster's damage when cast.
@@ -29,5 +29,6 @@ public class IceSpell extends Spell {
     public void applySpellEffect(Monster monster) {
         int oldDamage = monster.getDamage();
         monster.setDamage((int) (oldDamage * 0.9)); // Reduce damage by 10%
+        System.out.println(monster.getName() + "'s damage reduced!");
     }
 }

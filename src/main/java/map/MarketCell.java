@@ -4,6 +4,7 @@ package map;
  * Represents a market cell that is accessible and has special function.
  */
 public class MarketCell extends Cell {
+
     @Override
     public boolean isAccessible() {
         return true;
@@ -15,7 +16,7 @@ public class MarketCell extends Cell {
     }
 
     @Override
-    public String getSymbol() {
-        return "M";
+    public char toChar() {
+        return 'M';
     }
 }

@@ -1,6 +1,6 @@
 package map;
 
-import java.util.Arrays;
+import util.Position;
 
 /**
  * GameMap handles the grid of the game world, including hero positions and cell types.
@@ -16,11 +16,15 @@ public class GameMap {
     }
 
     private void initDefaultMap() {
+        // Generate random map: 20% inaccessible, 30% market, 50% common
+        java.util.Random rand = new java.util.Random();
+
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[0].length; j++) {
-                if (j % 3 == 1) {
+                double p = rand.nextDouble();
+                if (p < 0.2) {
                     grid[i][j] = new InaccessibleCell();
-                } else if (j % 3 == 2) {
+                } else if (p < 0.5) {
                     grid[i][j] = new MarketCell();
                 } else {
                     grid[i][j] = new CommonCell();
@@ -37,6 +41,7 @@ public class GameMap {
 
     public int[] getHeroPosition(int index) {
         Position pos = heroPositions[index];
+        if (pos == null) return new int[]{0, 0};
         return new int[]{pos.getX(), pos.getY()};
     }
 
@@ -52,6 +57,8 @@ public class GameMap {
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[0].length; j++) {
                 boolean occupied = false;
+
+                // Check if any hero is at this position
                 for (int k = 0; k < heroPositions.length; k++) {
                     Position pos = heroPositions[k];
                     if (pos != null && pos.getX() == i && pos.getY() == j) {
@@ -60,6 +67,7 @@ public class GameMap {
                         break;
                     }
                 }
+
                 if (!occupied) {
                     System.out.print(grid[i][j].toChar() + "  ");
                 }

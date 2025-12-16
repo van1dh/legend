@@ -10,7 +10,6 @@ import java.util.Scanner;
 
 /**
  * Handles market interactions where heroes can buy and sell items.
- * Each market offers weapons, armor, potions, and spells.
  */
 public class Market {
     private Scanner scanner;
@@ -22,9 +21,6 @@ public class Market {
         loadMarketInventory();
     }
 
-    /**
-     * Load all items available in the market.
-     */
     private void loadMarketInventory() {
         inventory.addAll(loadWeapons());
         inventory.addAll(loadArmor());
@@ -32,28 +28,26 @@ public class Market {
         inventory.addAll(loadSpells());
     }
 
-    /**
-     * Enter the market menu for a specific hero.
-     */
     public void enter(Hero hero) {
-        System.out.println("\n╔════════════════════════════════════╗");
-        System.out.println("║        WELCOME TO THE MARKET       ║");
-        System.out.println("╚════════════════════════════════════╝");
-        System.out.println("Current Hero: " + hero.getName());
+        System.out.println("\n========================================");
+        System.out.println("  WELCOME TO THE MARKET");
+        System.out.println("========================================");
+        System.out.println("Hero: " + hero.getName());
         System.out.println("Gold: " + hero.getMoney());
         System.out.println();
 
         while (true) {
-            System.out.println("\n=== MARKET MENU ===");
+            System.out.println("\n--- MARKET MENU ---");
             System.out.println("1) Buy items");
             System.out.println("2) Sell items");
             System.out.println("3) Equip weapon");
             System.out.println("4) Equip armor");
             System.out.println("5) View inventory");
             System.out.println("6) Exit market");
+            System.out.println("Q) Quit game");
             System.out.print("Choice: ");
 
-            String choice = scanner.nextLine().trim();
+            String choice = scanner.nextLine().trim().toUpperCase();
 
             switch (choice) {
                 case "1":
@@ -69,28 +63,29 @@ public class Market {
                     equipArmorMenu(hero);
                     break;
                 case "5":
-                    hero.getInventory().printInventory();
+                    viewInventory(hero);
                     break;
                 case "6":
-                    System.out.println("Thanks for visiting!");
+                    System.out.println("Thanks for visiting! Come back soon!");
+                    return;
+                case "Q":
+                    System.out.println("Leaving market...");
                     return;
                 default:
-                    System.out.println("Invalid choice!");
+                    System.out.println("[ERROR] Invalid choice!");
                     break;
             }
         }
     }
 
-    /**
-     * Display and handle buying items.
-     */
     private void buyMenu(Hero hero) {
-        System.out.println("\n=== BUY ITEMS ===");
+        System.out.println("\n========================================");
+        System.out.println("  BUY ITEMS");
+        System.out.println("========================================");
         System.out.println("Your Gold: " + hero.getMoney());
         System.out.println("Your Level: " + hero.getLevel());
         System.out.println();
 
-        // Display items by category
         displayItemsByCategory(hero);
 
         System.out.print("\nEnter item number to buy (or 0 to cancel): ");
@@ -98,7 +93,7 @@ public class Market {
             int choice = Integer.parseInt(scanner.nextLine().trim());
             if (choice == 0) return;
             if (choice < 1 || choice > inventory.size()) {
-                System.out.println("Invalid item number!");
+                System.out.println("[ERROR] Invalid item number!");
                 return;
             }
 
@@ -106,25 +101,23 @@ public class Market {
 
             if (!hero.canBuy(item)) {
                 if (hero.getMoney() < item.getCost()) {
-                    System.out.println("Not enough gold! Need " + item.getCost() +
+                    System.out.println("[ERROR] Not enough gold! Need " + item.getCost() +
                             " but only have " + hero.getMoney());
                 } else {
-                    System.out.println("Level too low! Need level " + item.getRequiredLevel() +
+                    System.out.println("[ERROR] Level too low! Need level " + item.getRequiredLevel() +
                             " but you are level " + hero.getLevel());
                 }
                 return;
             }
 
             hero.buyItem(item);
+            System.out.println("[SUCCESS] Purchase successful!");
 
         } catch (NumberFormatException e) {
-            System.out.println("Invalid input!");
+            System.out.println("[ERROR] Invalid input!");
         }
     }
 
-    /**
-     * Display items grouped by category.
-     */
     private void displayItemsByCategory(Hero hero) {
         int index = 1;
 
@@ -157,26 +150,22 @@ public class Market {
         }
     }
 
-    /**
-     * Display a single item with affordability indicator.
-     */
     private void displayItem(int index, Item item, Hero hero) {
-        String affordable = hero.canBuy(item) ? "[✓]" : "[✗]";
+        String affordable = hero.canBuy(item) ? "[OK]" : "[X]";
         System.out.println(index + ") " + affordable + " " + item);
     }
 
-    /**
-     * Display and handle selling items.
-     */
     private void sellMenu(Hero hero) {
-        System.out.println("\n=== SELL ITEMS ===");
+        System.out.println("\n========================================");
+        System.out.println("  SELL ITEMS");
+        System.out.println("========================================");
         System.out.println("(Items sell for half their purchase price)");
         System.out.println();
 
         List<Item> heroItems = getAllHeroItems(hero);
 
         if (heroItems.isEmpty()) {
-            System.out.println("You have no items to sell!");
+            System.out.println("[ERROR] You have no items to sell!");
             return;
         }
 
@@ -191,32 +180,36 @@ public class Market {
             int choice = Integer.parseInt(scanner.nextLine().trim());
             if (choice == 0) return;
             if (choice < 1 || choice > heroItems.size()) {
-                System.out.println("Invalid item number!");
+                System.out.println("[ERROR] Invalid item number!");
                 return;
             }
 
             Item item = heroItems.get(choice - 1);
             hero.sellItem(item);
+            System.out.println("[SUCCESS] Item sold successfully!");
 
         } catch (NumberFormatException e) {
-            System.out.println("Invalid input!");
+            System.out.println("[ERROR] Invalid input!");
         }
     }
 
-    /**
-     * Menu for equipping weapons.
-     */
     private void equipWeaponMenu(Hero hero) {
         List<Weapon> weapons = hero.getInventory().getWeapons();
 
         if (weapons.isEmpty()) {
-            System.out.println("You have no weapons!");
+            System.out.println("[ERROR] You have no weapons!");
             return;
         }
 
-        System.out.println("\n=== EQUIP WEAPON ===");
+        System.out.println("\n--- EQUIP WEAPON ---");
+        System.out.println("Currently equipped: " +
+                (hero.getEquippedWeapon() != null ? hero.getEquippedWeapon().getName() : "None"));
+        System.out.println();
+
         for (int i = 0; i < weapons.size(); i++) {
-            System.out.println((i + 1) + ") " + weapons.get(i));
+            Weapon w = weapons.get(i);
+            String equipped = (w == hero.getEquippedWeapon()) ? " [EQUIPPED]" : "";
+            System.out.println((i + 1) + ") " + w + equipped);
         }
 
         System.out.print("Select weapon (or 0 to cancel): ");
@@ -225,28 +218,32 @@ public class Market {
             if (choice == 0) return;
             if (choice >= 1 && choice <= weapons.size()) {
                 hero.equipWeapon(weapons.get(choice - 1));
+                System.out.println("[SUCCESS] Weapon equipped!");
             } else {
-                System.out.println("Invalid choice!");
+                System.out.println("[ERROR] Invalid choice!");
             }
         } catch (NumberFormatException e) {
-            System.out.println("Invalid input!");
+            System.out.println("[ERROR] Invalid input!");
         }
     }
 
-    /**
-     * Menu for equipping armor.
-     */
     private void equipArmorMenu(Hero hero) {
         List<Armor> armors = hero.getInventory().getArmors();
 
         if (armors.isEmpty()) {
-            System.out.println("You have no armor!");
+            System.out.println("[ERROR] You have no armor!");
             return;
         }
 
-        System.out.println("\n=== EQUIP ARMOR ===");
+        System.out.println("\n--- EQUIP ARMOR ---");
+        System.out.println("Currently equipped: " +
+                (hero.getEquippedArmor() != null ? hero.getEquippedArmor().getName() : "None"));
+        System.out.println();
+
         for (int i = 0; i < armors.size(); i++) {
-            System.out.println((i + 1) + ") " + armors.get(i));
+            Armor a = armors.get(i);
+            String equipped = (a == hero.getEquippedArmor()) ? " [EQUIPPED]" : "";
+            System.out.println((i + 1) + ") " + a + equipped);
         }
 
         System.out.print("Select armor (or 0 to cancel): ");
@@ -255,17 +252,23 @@ public class Market {
             if (choice == 0) return;
             if (choice >= 1 && choice <= armors.size()) {
                 hero.equipArmor(armors.get(choice - 1));
+                System.out.println("[SUCCESS] Armor equipped!");
             } else {
-                System.out.println("Invalid choice!");
+                System.out.println("[ERROR] Invalid choice!");
             }
         } catch (NumberFormatException e) {
-            System.out.println("Invalid input!");
+            System.out.println("[ERROR] Invalid input!");
         }
     }
 
-    /**
-     * Get all items from hero's inventory as a flat list.
-     */
+    private void viewInventory(Hero hero) {
+        System.out.println("\n========================================");
+        System.out.println("  " + hero.getName() + "'s INVENTORY");
+        System.out.println("========================================");
+        hero.getInventory().printInventory();
+        System.out.println();
+    }
+
     private List<Item> getAllHeroItems(Hero hero) {
         List<Item> items = new ArrayList<>();
         items.addAll(hero.getInventory().getWeapons());
@@ -275,18 +278,13 @@ public class Market {
         return items;
     }
 
-    // ===== Data Loading Methods =====
-
     private List<Weapon> loadWeapons() {
         List<Weapon> weapons = new ArrayList<>();
         List<String[]> data = FileLoader.loadFile("src/data/Weaponry.txt");
         for (String[] row : data) {
             weapons.add(new Weapon(
-                    row[0], // name
-                    Integer.parseInt(row[1]), // cost
-                    Integer.parseInt(row[2]), // level
-                    Integer.parseInt(row[3]), // damage
-                    Integer.parseInt(row[4])  // hands
+                    row[0], Integer.parseInt(row[1]), Integer.parseInt(row[2]),
+                    Integer.parseInt(row[3]), Integer.parseInt(row[4])
             ));
         }
         return weapons;
@@ -297,10 +295,8 @@ public class Market {
         List<String[]> data = FileLoader.loadFile("src/data/Armory.txt");
         for (String[] row : data) {
             armors.add(new Armor(
-                    row[0], // name
-                    Integer.parseInt(row[1]), // cost
-                    Integer.parseInt(row[2]), // level
-                    Integer.parseInt(row[3])  // reduction
+                    row[0], Integer.parseInt(row[1]), Integer.parseInt(row[2]),
+                    Integer.parseInt(row[3])
             ));
         }
         return armors;
@@ -310,17 +306,13 @@ public class Market {
         List<Potion> potions = new ArrayList<>();
         List<String[]> data = FileLoader.loadFile("src/data/Potions.txt");
         for (String[] row : data) {
-            // Parse affected attributes (everything after index 3)
             java.util.Set<String> attributes = new java.util.HashSet<>();
             for (int i = 4; i < row.length; i++) {
                 attributes.add(row[i]);
             }
             potions.add(new Potion(
-                    row[0], // name
-                    Integer.parseInt(row[1]), // cost
-                    Integer.parseInt(row[2]), // level
-                    Integer.parseInt(row[3]), // effect
-                    attributes
+                    row[0], Integer.parseInt(row[1]), Integer.parseInt(row[2]),
+                    Integer.parseInt(row[3]), attributes
             ));
         }
         return potions;
@@ -329,7 +321,6 @@ public class Market {
     private List<Spell> loadSpells() {
         List<Spell> spells = new ArrayList<>();
 
-        // Load Fire Spells
         List<String[]> fireData = FileLoader.loadFile("src/data/FireSpells.txt");
         for (String[] row : fireData) {
             spells.add(new FireSpell(
@@ -338,7 +329,6 @@ public class Market {
             ));
         }
 
-        // Load Ice Spells
         List<String[]> iceData = FileLoader.loadFile("src/data/IceSpells.txt");
         for (String[] row : iceData) {
             spells.add(new IceSpell(
@@ -347,7 +337,6 @@ public class Market {
             ));
         }
 
-        // Load Lightning Spells
         List<String[]> lightData = FileLoader.loadFile("src/data/LightningSpells.txt");
         for (String[] row : lightData) {
             spells.add(new LightningSpell(

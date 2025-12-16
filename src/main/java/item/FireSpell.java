@@ -1,6 +1,6 @@
 package item;
 
-import core.character.Monster;
+import character.monster.Monster;
 
 /**
  * FireSpell is a type of Spell that reduces the target monster's defense when cast.
@@ -29,5 +29,6 @@ public class FireSpell extends Spell {
     public void applySpellEffect(Monster monster) {
         int oldDefense = monster.getDefense();
         monster.setDefense((int) (oldDefense * 0.9)); // Reduce defense by 10%
+        System.out.println(monster.getName() + "'s defense reduced!");
     }
 }

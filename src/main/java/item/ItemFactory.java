@@ -3,7 +3,9 @@ package item;
 import util.FileLoader;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Factory class for loading items (Weapons, Armors, Potions, and Spells) from file.
@@ -45,10 +47,13 @@ public class ItemFactory {
             int cost = Integer.parseInt(row[1]);
             int level = Integer.parseInt(row[2]);
             int increase = Integer.parseInt(row[3]);
-            List<String> attributes = new ArrayList<>();
+
+            // Convert to Set<String>
+            Set<String> attributes = new HashSet<>();
             for (int i = 4; i < row.length; i++) {
                 attributes.add(row[i]);
             }
+
             potions.add(new Potion(name, cost, level, increase, attributes));
         }
         return potions;

@@ -1,6 +1,6 @@
 package item;
 
-import core.character.Monster;
+import character.monster.Monster;
 
 /**
  * LightningSpell is a type of Spell that reduces the target monster's dodge chance.
@@ -29,5 +29,6 @@ public class LightningSpell extends Spell {
     public void applySpellEffect(Monster monster) {
         double oldDodge = monster.getDodgeChance();
         monster.setDodgeChance(oldDodge * 0.9); // Reduce dodge chance by 10%
+        System.out.println(monster.getName() + "'s dodge chance reduced!");
     }
 }

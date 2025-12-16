@@ -6,7 +6,7 @@ import character.monster.Monster;
 
 /**
  * Abstract class representing a Hero character in the game.
- * Encapsulates common stats, inventory, and actions.
+ * Heroes start with powerful starter equipment!
  */
 public abstract class Hero {
     protected String name;
@@ -34,22 +34,151 @@ public abstract class Hero {
     public Hero(String name, int mana, int strength, int agility, int dexterity, int money, int experience) {
         this.name = name;
         this.level = calculateLevel(experience);
-        this.maxHP = level * 100;
+
+        // 大幅提高基础属性（3倍）
+        this.maxHP = level * 300;  // 原来是 level * 100
         this.currentHP = maxHP;
-        this.maxMana = mana;
-        this.currentMana = mana;
-        this.strength = strength;
-        this.agility = agility;
-        this.dexterity = dexterity;
-        this.money = money;
+        this.maxMana = mana * 3;   // 3倍魔法值
+        this.currentMana = maxMana;
+        this.strength = strength * 2;    // 2倍力量
+        this.agility = agility * 2;      // 2倍敏捷
+        this.dexterity = dexterity * 2;  // 2倍灵巧
+        this.money = money * 3;           // 3倍金钱
         this.experience = experience;
         this.inventory = new Inventory();
         this.heroClass = "Hero";
+
+        // Give starter equipment
+        giveStarterEquipment();
     }
 
     /**
-     * Calculate level based on experience points.
+     * Give hero starter equipment (powerful weapons, armor, potions and spells)
      */
+    private void giveStarterEquipment() {
+        giveStarterWeapon();
+        giveStarterArmor();
+        giveStarterPotions();
+        giveStarterSpells();
+
+        System.out.println("[EQUIPMENT] " + name + " received starter equipment!");
+    }
+
+    /**
+     * Give starter weapon (based on hero type)
+     */
+    private void giveStarterWeapon() {
+        Weapon weapon = null;
+
+        if (this instanceof Warrior) {
+            // 战士：超强双手剑
+            weapon = new Weapon("Legendary Greatsword", 0, 1, 2500, 2);
+        } else if (this instanceof Paladin) {
+            // 圣骑士：强力单手剑
+            weapon = new Weapon("Holy Longsword", 0, 1, 2200, 1);
+        } else if (this instanceof Sorcerer) {
+            // 法师：魔法法杖
+            weapon = new Weapon("Arcane Staff", 0, 1, 2000, 1);
+        }
+
+        if (weapon != null) {
+            inventory.addItem(weapon);
+            equipWeapon(weapon);
+            System.out.println("  -> Equipped: " + weapon.getName());
+        }
+    }
+
+    /**
+     * Give starter armor
+     */
+    private void giveStarterArmor() {
+        Armor armor = null;
+
+        if (this instanceof Warrior) {
+            // 战士：超重型盔甲
+            armor = new Armor("Titanium Heavy Armor", 0, 1, 800);
+        } else if (this instanceof Paladin) {
+            // 圣骑士：强化板甲
+            armor = new Armor("Divine Plate Armor", 0, 1, 700);
+        } else if (this instanceof Sorcerer) {
+            // 法师：魔法长袍
+            armor = new Armor("Enchanted Mage Robe", 0, 1, 600);
+        }
+
+        if (armor != null) {
+            inventory.addItem(armor);
+            equipArmor(armor);
+            System.out.println("  -> Equipped: " + armor.getName());
+        }
+    }
+
+    /**
+     * Give starter potions (multiple types, large quantity)
+     */
+    private void giveStarterPotions() {
+        // 10 healing potions (加倍)
+        for (int i = 0; i < 10; i++) {
+            java.util.Set<String> healthAttr = new java.util.HashSet<>();
+            healthAttr.add("Health");
+            Potion healthPotion = new Potion("Super Healing Potion", 0, 1, 300, healthAttr);
+            inventory.addItem(healthPotion);
+        }
+
+        // 10 mana potions (加倍)
+        for (int i = 0; i < 10; i++) {
+            java.util.Set<String> manaAttr = new java.util.HashSet<>();
+            manaAttr.add("Mana");
+            Potion manaPotion = new Potion("Super Mana Potion", 0, 1, 300, manaAttr);
+            inventory.addItem(manaPotion);
+        }
+
+        // 5 strength potions
+        for (int i = 0; i < 5; i++) {
+            java.util.Set<String> strAttr = new java.util.HashSet<>();
+            strAttr.add("Strength");
+            Potion strPotion = new Potion("Greater Strength Potion", 0, 1, 200, strAttr);
+            inventory.addItem(strPotion);
+        }
+
+        // 5 agility potions
+        for (int i = 0; i < 5; i++) {
+            java.util.Set<String> agiAttr = new java.util.HashSet<>();
+            agiAttr.add("Agility");
+            Potion agiPotion = new Potion("Greater Agility Potion", 0, 1, 200, agiAttr);
+            inventory.addItem(agiPotion);
+        }
+
+        System.out.println("  -> Received: 10x Super Healing, 10x Super Mana, 5x Greater Strength, 5x Greater Agility Potions");
+    }
+
+    /**
+     * Give starter spells (based on hero type, large quantity)
+     */
+    private void giveStarterSpells() {
+        // All heroes get spells, sorcerers get even more
+        int spellCount = (this instanceof Sorcerer) ? 10 : 7;
+
+        // Give powerful fire spells
+        for (int i = 0; i < spellCount; i++) {
+            FireSpell fireSpell = new FireSpell("Mega Fireball", 0, 1, 1200, 80);
+            inventory.addItem(fireSpell);
+        }
+
+        // Give powerful ice spells
+        for (int i = 0; i < spellCount; i++) {
+            IceSpell iceSpell = new IceSpell("Frozen Nova", 0, 1, 1100, 75);
+            inventory.addItem(iceSpell);
+        }
+
+        // Give powerful lightning spells
+        for (int i = 0; i < spellCount; i++) {
+            LightningSpell lightningSpell = new LightningSpell("Chain Lightning", 0, 1, 1150, 70);
+            inventory.addItem(lightningSpell);
+        }
+
+        System.out.println("  -> Received: " + spellCount + "x Mega Fire, Ice, and Lightning Spells");
+    }
+
     private int calculateLevel(int exp) {
         int lvl = 1;
         int expNeeded = 10;
@@ -60,86 +189,68 @@ public abstract class Hero {
         return lvl;
     }
 
-    /**
-     * Level up increases all skills by 5% and favored skills by additional 5%.
-     * Subclasses override to specify which skills are favored.
-     */
     public void levelUp() {
         level++;
 
-        // Base increases for all skills (5%)
         strength = (int) (strength * 1.05);
         dexterity = (int) (dexterity * 1.05);
         agility = (int) (agility * 1.05);
 
-        // Reset HP based on new level
-        maxHP = level * 100;
+        // 使用新的HP计算公式
+        maxHP = level * 300;
         currentHP = maxHP;
 
-        // Increase mana by 10%
         maxMana = (int) (maxMana * 1.1);
         currentMana = maxMana;
 
         System.out.println(name + " leveled up to level " + level + "!");
     }
 
-    /**
-     * Check if hero is alive.
-     */
     public boolean isAlive() {
         return currentHP > 0;
     }
 
-    /**
-     * Hero attacks a monster with equipped weapon.
-     */
     public void attack(Monster monster) {
         if (equippedWeapon == null) {
             System.out.println(name + " has no weapon equipped!");
             return;
         }
 
-        // Check if monster dodges
         if (Math.random() < monster.getDodgeChance() * 0.01) {
             System.out.println(monster.getName() + " dodged the attack!");
             return;
         }
 
-        // Calculate damage: (strength + weapon_damage) * 0.05
         int damage = (int) ((strength + equippedWeapon.getDamage()) * 0.05);
         monster.takeDamage(damage);
         System.out.println(name + " dealt " + damage + " damage to " + monster.getName());
     }
 
-    /**
-     * Cast a spell on a monster.
-     */
     public void castSpell(Spell spell, Monster monster) {
         if (currentMana < spell.getManaCost()) {
             System.out.println(name + " doesn't have enough mana!");
             return;
         }
 
-        // Check if monster dodges
         if (Math.random() < monster.getDodgeChance() * 0.01) {
             System.out.println(monster.getName() + " dodged the spell!");
             return;
         }
 
-        // Calculate spell damage
         int damage = (int) (spell.getBaseDamage() + (dexterity / 10000.0) * spell.getBaseDamage());
         monster.takeDamage(damage);
 
-        // Apply spell effect
         spell.applySpellEffect(monster);
 
         currentMana -= spell.getManaCost();
+
+        // 法术使用后消失（一次性物品）
+        inventory.getSpells().remove(spell);
+
         System.out.println(name + " cast " + spell.getName() + " dealing " + damage + " damage!");
+        System.out.println("[INFO] " + spell.getName() + " consumed (single-use item)");
     }
 
-    /**
-     * Use a potion from inventory.
-     */
     public void usePotion(Potion potion) {
         for (String attr : potion.getAffectedAttributes()) {
             switch (attr.toLowerCase()) {
@@ -170,9 +281,6 @@ public abstract class Hero {
         inventory.getPotions().remove(potion);
     }
 
-    /**
-     * Regenerate HP and Mana at end of round (10% each).
-     */
     public void regen() {
         if (isAlive()) {
             currentHP = Math.min(maxHP, (int) (currentHP * 1.1));
@@ -180,18 +288,13 @@ public abstract class Hero {
         }
     }
 
-    /**
-     * Take damage from a monster, reduced by armor.
-     */
     public void takeDamage(int damage) {
-        // Check dodge chance
         double dodgeChance = agility * 0.002;
         if (Math.random() < dodgeChance) {
             System.out.println(name + " dodged the attack!");
             return;
         }
 
-        // Reduce damage by armor
         int reduction = equippedArmor != null ? equippedArmor.getDamageReduction() : 0;
         int actualDamage = Math.max(0, damage - reduction);
         currentHP = Math.max(0, currentHP - actualDamage);
@@ -203,25 +306,16 @@ public abstract class Hero {
         }
     }
 
-    /**
-     * Revive hero with half HP and mana.
-     */
     public void revive() {
         currentHP = maxHP / 2;
         currentMana = maxMana / 2;
         System.out.println(name + " has been revived!");
     }
 
-    /**
-     * Revive at half HP (for Valor mode).
-     */
     public void reviveAtHalfHP() {
         revive();
     }
 
-    /**
-     * Gain experience and potentially level up.
-     */
     public void gainExperience(int exp) {
         experience += exp;
         int expNeeded = level * 10;
@@ -231,24 +325,15 @@ public abstract class Hero {
         }
     }
 
-    /**
-     * Gain gold reward.
-     */
     public void gainGold(int amount) {
         money += amount;
         System.out.println(name + " gained " + amount + " gold!");
     }
 
-    /**
-     * Check if hero can buy an item.
-     */
     public boolean canBuy(Item item) {
         return money >= item.getCost() && level >= item.getRequiredLevel();
     }
 
-    /**
-     * Buy an item from market.
-     */
     public void buyItem(Item item) {
         if (!canBuy(item)) {
             System.out.println("Cannot buy " + item.getName());
@@ -260,13 +345,9 @@ public abstract class Hero {
         System.out.println(name + " bought " + item.getName() + " for " + item.getCost() + " gold");
     }
 
-    /**
-     * Sell an item for half price.
-     */
     public void sellItem(Item item) {
         int sellPrice = item.getCost() / 2;
         money += sellPrice;
-        // Remove from inventory based on type
         if (item instanceof Weapon) inventory.getWeapons().remove(item);
         else if (item instanceof Armor) inventory.getArmors().remove(item);
         else if (item instanceof Potion) inventory.getPotions().remove(item);
@@ -275,17 +356,11 @@ public abstract class Hero {
         System.out.println(name + " sold " + item.getName() + " for " + sellPrice + " gold");
     }
 
-    /**
-     * Equip a weapon from inventory.
-     */
     public void equipWeapon(Weapon weapon) {
         this.equippedWeapon = weapon;
         System.out.println(name + " equipped " + weapon.getName());
     }
 
-    /**
-     * Equip armor from inventory.
-     */
     public void equipArmor(Armor armor) {
         this.equippedArmor = armor;
         System.out.println(name + " equipped " + armor.getName());
@@ -308,7 +383,7 @@ public abstract class Hero {
     public Weapon getEquippedWeapon() { return equippedWeapon; }
     public Armor getEquippedArmor() { return equippedArmor; }
 
-    // Valor mode position methods
+    // Valor mode methods
     public int getRow() { return row; }
     public int getCol() { return col; }
     public int getLaneIndex() { return laneIndex; }
@@ -318,7 +393,6 @@ public abstract class Hero {
     }
     public void setLaneIndex(int index) { this.laneIndex = index; }
 
-    // Valor mode buff methods
     public void applyTemporaryStrengthBuff(double multiplier) {
         strength = (int) (strength * multiplier);
     }
@@ -347,4 +421,3 @@ public abstract class Hero {
                 " | Gold: " + money + " | EXP: " + experience;
     }
 }
-
