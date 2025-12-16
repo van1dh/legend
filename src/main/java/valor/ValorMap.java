@@ -1,7 +1,6 @@
 package valor;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Random;
 
 import valor.cells.*;
@@ -10,14 +9,7 @@ import character.monster.Monster;
 
 /**
  * 8x8 three-lane map for Legends of Valor.
- * Layout:
- * - Columns 0-1: Top Lane
- * - Column 2: Wall (Inaccessible)
- * - Columns 3-4: Mid Lane
- * - Column 5: Wall (Inaccessible)
- * - Columns 6-7: Bot Lane
- * - Row 0: Monster Nexus
- * - Row 7: Hero Nexus
+ * Layout matches PDF specification with proper display format.
  */
 public class ValorMap {
     private static final int SIZE = 8;
@@ -34,6 +26,10 @@ public class ValorMap {
 
     /**
      * Initialize the map according to Valor specifications.
+     * Row 0: Monster Nexus
+     * Row 7: Hero Nexus
+     * Columns 2, 5: Inaccessible walls
+     * Other cells: Random terrain (20% Bush, 20% Cave, 20% Koulou, 40% Plain)
      */
     private void initializeMap() {
         for (int row = 0; row < SIZE; row++) {
@@ -86,23 +82,11 @@ public class ValorMap {
     }
 
     /**
-     * Place initial monsters in their nexus (row 0, right column of each lane).
-     */
-    public void placeInitialMonsters(List<Monster> monsters) {
-        int[][] laneColumns = {{1}, {4}, {7}}; // Right column of each lane
-
-        for (int i = 0; i < Math.min(monsters.size(), 3); i++) {
-            Monster monster = monsters.get(i);
-            int col = laneColumns[i][0];
-            monster.setPosition(0, col);
-        }
-    }
-
-    /**
      * Spawn new monsters (every 8 rounds).
+     * Monsters spawn in right column of each lane at row 0.
      */
     public void spawnMonsters(List<Monster> monsters) {
-        int[][] laneColumns = {{1}, {4}, {7}};
+        int[][] laneColumns = {{1}, {4}, {7}}; // Right column of each lane
 
         for (int i = 0; i < Math.min(monsters.size(), 3); i++) {
             Monster monster = monsters.get(i);
@@ -131,9 +115,6 @@ public class ValorMap {
                 return false;
             }
         }
-
-        // Cannot move behind a monster (must kill it first)
-        // This is checked in the move validation logic
 
         return true;
     }
@@ -233,58 +214,84 @@ public class ValorMap {
     }
 
     /**
-     * Display the map with heroes and monsters.
+     * Display the map in the format specified by the PDF.
+     * Format matches the example shown in the PDF document.
      */
     public void display(List<Hero> heroes, List<Monster> monsters) {
-        System.out.println("\n========================================");
-        System.out.println("  VALOR BATTLEFIELD");
-        System.out.println("========================================");
-
-        // Print column headers
-        System.out.print("     ");
-        for (int col = 0; col < SIZE; col++) {
-            System.out.print(col + "   ");
-        }
         System.out.println();
-        System.out.println("   " + "----".repeat(SIZE));
 
         for (int row = 0; row < SIZE; row++) {
-            System.out.print(row + " | ");
+            // Print three lines per row to create the cell boxes
 
+            // Line 1: Top border of cells
             for (int col = 0; col < SIZE; col++) {
-                ValorCell cell = grid[row][col];
+                String cellType = String.valueOf(grid[row][col].symbol());
+                System.out.print(cellType + " - " + cellType + " - " + cellType + "  ");
+            }
+            System.out.println();
+
+            // Line 2: Left border, content, right border
+            for (int col = 0; col < SIZE; col++) {
+                String cellType = String.valueOf(grid[row][col].symbol());
+
+                // Get entities at this position
                 Hero heroHere = getHeroAt(row, col, heroes);
                 Monster monsterHere = getMonsterAt(row, col, monsters);
 
-                String display;
+                String leftContent = cellType;
+                String centerContent = " ";
+                String rightContent = cellType;
 
-                if (heroHere != null && monsterHere != null) {
-                    // Both present - show X
-                    display = "X";
-                } else if (heroHere != null) {
-                    // Show hero number (1, 2, 3)
-                    display = "H" + (heroHere.getLaneIndex() + 1);
-                } else if (monsterHere != null) {
-                    // Show M
-                    display = "M";
-                } else {
-                    // Show terrain
-                    display = String.valueOf(cell.symbol());
+                // Show hero on left side - use their ORIGINAL laneIndex for display
+                if (heroHere != null) {
+                    leftContent = "H" + (heroHere.getLaneIndex() + 1);  // H1/H2/H3 based on original lane
                 }
 
-                // Pad to 3 characters for alignment
-                System.out.print(String.format("%-3s", display) + " ");
-            }
-            System.out.println("|");
-        }
-        System.out.println("   " + "----".repeat(SIZE));
+                // Show monster on right side
+                if (monsterHere != null) {
+                    // Find which lane this monster is in based on column
+                    int monsterLane = getLaneForColumn(col);
+                    rightContent = "M" + (monsterLane + 1);
+                }
 
-        // Legend
-        System.out.println("\nLegend:");
-        System.out.println("H1/H2/H3 - Heroes  |  M - Monster  |  X - Hero+Monster");
-        System.out.println("N - Nexus  |  I - Wall  |  P - Plain");
-        System.out.println("B - Bush (+DEX)  |  C - Cave (+AGI)  |  K - Koulou (+STR)");
+                // Handle wall spacing (XXX)
+                if (grid[row][col] instanceof InaccessibleCell) {
+                    System.out.print("| X X X |  ");
+                } else {
+                    System.out.print("| " + leftContent + " " + centerContent + " " + rightContent + " |  ");
+                }
+            }
+            System.out.println();
+
+            // Line 3: Bottom border of cells
+            for (int col = 0; col < SIZE; col++) {
+                String cellType = String.valueOf(grid[row][col].symbol());
+                System.out.print(cellType + " - " + cellType + " - " + cellType + "  ");
+            }
+            System.out.println();
+            System.out.println(); // Extra line between rows
+        }
+
+        // Print legend
+        System.out.println("Legend:");
+        System.out.println("  H1/H2/H3 - Your Heroes (Original Lane 1/2/3)");
+        System.out.println("  M1/M2/M3 - Monsters (Current Lane 1/2/3)");
+        System.out.println("  N - Nexus  |  I - Inaccessible Wall");
+        System.out.println("  P - Plain  |  B - Bush (+10% Dexterity)");
+        System.out.println("  C - Cave (+10% Agility)  |  K - Koulou (+10% Strength)");
         System.out.println();
+        System.out.println("Note: Heroes keep their original lane number (H1/H2/H3) even when teleporting!");
+        System.out.println();
+    }
+
+    /**
+     * Remove an obstacle at the given position, converting it to a plain cell.
+     */
+    public void removeObstacle(int row, int col) {
+        if (inBounds(row, col) && grid[row][col] instanceof ObstacleCell) {
+            grid[row][col] = new PlainCell();
+            System.out.println("[SUCCESS] Obstacle removed at (" + row + "," + col + ")");
+        }
     }
 
     public int getSize() {

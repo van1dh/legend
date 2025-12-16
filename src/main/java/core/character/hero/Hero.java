@@ -27,23 +27,23 @@ public abstract class Hero {
     protected Inventory inventory;
 
     // Valor mode fields
-    protected int row;
-    protected int col;
-    protected int laneIndex;
+    protected int row;           // Current row position on map
+    protected int col;           // Current column position on map
+    protected int laneIndex;     // Original lane (0=Top, 1=Mid, 2=Bot) - NEVER changes, even when teleporting
 
     public Hero(String name, int mana, int strength, int agility, int dexterity, int money, int experience) {
         this.name = name;
         this.level = calculateLevel(experience);
 
-        // 大幅提高基础属性（3倍）
-        this.maxHP = level * 300;  // 原来是 level * 100
+        // Enhanced base stats (3x)
+        this.maxHP = level * 300;
         this.currentHP = maxHP;
-        this.maxMana = mana * 3;   // 3倍魔法值
+        this.maxMana = mana * 3;
         this.currentMana = maxMana;
-        this.strength = strength * 2;    // 2倍力量
-        this.agility = agility * 2;      // 2倍敏捷
-        this.dexterity = dexterity * 2;  // 2倍灵巧
-        this.money = money * 3;           // 3倍金钱
+        this.strength = strength * 2;
+        this.agility = agility * 2;
+        this.dexterity = dexterity * 2;
+        this.money = money * 3;
         this.experience = experience;
         this.inventory = new Inventory();
         this.heroClass = "Hero";
@@ -71,13 +71,10 @@ public abstract class Hero {
         Weapon weapon = null;
 
         if (this instanceof Warrior) {
-            // 战士：超强双手剑
             weapon = new Weapon("Legendary Greatsword", 0, 1, 2500, 2);
         } else if (this instanceof Paladin) {
-            // 圣骑士：强力单手剑
             weapon = new Weapon("Holy Longsword", 0, 1, 2200, 1);
         } else if (this instanceof Sorcerer) {
-            // 法师：魔法法杖
             weapon = new Weapon("Arcane Staff", 0, 1, 2000, 1);
         }
 
@@ -95,13 +92,10 @@ public abstract class Hero {
         Armor armor = null;
 
         if (this instanceof Warrior) {
-            // 战士：超重型盔甲
             armor = new Armor("Titanium Heavy Armor", 0, 1, 800);
         } else if (this instanceof Paladin) {
-            // 圣骑士：强化板甲
             armor = new Armor("Divine Plate Armor", 0, 1, 700);
         } else if (this instanceof Sorcerer) {
-            // 法师：魔法长袍
             armor = new Armor("Enchanted Mage Robe", 0, 1, 600);
         }
 
@@ -116,7 +110,6 @@ public abstract class Hero {
      * Give starter potions (multiple types, large quantity)
      */
     private void giveStarterPotions() {
-        // 10 healing potions (加倍)
         for (int i = 0; i < 10; i++) {
             java.util.Set<String> healthAttr = new java.util.HashSet<>();
             healthAttr.add("Health");
@@ -124,7 +117,6 @@ public abstract class Hero {
             inventory.addItem(healthPotion);
         }
 
-        // 10 mana potions (加倍)
         for (int i = 0; i < 10; i++) {
             java.util.Set<String> manaAttr = new java.util.HashSet<>();
             manaAttr.add("Mana");
@@ -132,7 +124,6 @@ public abstract class Hero {
             inventory.addItem(manaPotion);
         }
 
-        // 5 strength potions
         for (int i = 0; i < 5; i++) {
             java.util.Set<String> strAttr = new java.util.HashSet<>();
             strAttr.add("Strength");
@@ -140,7 +131,6 @@ public abstract class Hero {
             inventory.addItem(strPotion);
         }
 
-        // 5 agility potions
         for (int i = 0; i < 5; i++) {
             java.util.Set<String> agiAttr = new java.util.HashSet<>();
             agiAttr.add("Agility");
@@ -155,22 +145,18 @@ public abstract class Hero {
      * Give starter spells (based on hero type, large quantity)
      */
     private void giveStarterSpells() {
-        // All heroes get spells, sorcerers get even more
         int spellCount = (this instanceof Sorcerer) ? 10 : 7;
 
-        // Give powerful fire spells
         for (int i = 0; i < spellCount; i++) {
             FireSpell fireSpell = new FireSpell("Mega Fireball", 0, 1, 1200, 80);
             inventory.addItem(fireSpell);
         }
 
-        // Give powerful ice spells
         for (int i = 0; i < spellCount; i++) {
             IceSpell iceSpell = new IceSpell("Frozen Nova", 0, 1, 1100, 75);
             inventory.addItem(iceSpell);
         }
 
-        // Give powerful lightning spells
         for (int i = 0; i < spellCount; i++) {
             LightningSpell lightningSpell = new LightningSpell("Chain Lightning", 0, 1, 1150, 70);
             inventory.addItem(lightningSpell);
@@ -196,7 +182,6 @@ public abstract class Hero {
         dexterity = (int) (dexterity * 1.05);
         agility = (int) (agility * 1.05);
 
-        // 使用新的HP计算公式
         maxHP = level * 300;
         currentHP = maxHP;
 
@@ -244,7 +229,6 @@ public abstract class Hero {
 
         currentMana -= spell.getManaCost();
 
-        // 法术使用后消失（一次性物品）
         inventory.getSpells().remove(spell);
 
         System.out.println(name + " cast " + spell.getName() + " dealing " + damage + " damage!");
@@ -382,6 +366,10 @@ public abstract class Hero {
     public Inventory getInventory() { return inventory; }
     public Weapon getEquippedWeapon() { return equippedWeapon; }
     public Armor getEquippedArmor() { return equippedArmor; }
+
+    // Setters for respawn (Valor mode)
+    public void setHP(int hp) { this.currentHP = Math.min(hp, maxHP); }
+    public void setMana(int mana) { this.currentMana = Math.min(mana, maxMana); }
 
     // Valor mode methods
     public int getRow() { return row; }
